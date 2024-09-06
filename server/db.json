@@ -1,0 +1,51 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Tom"
+    },
+    {
+      "id": "2",
+      "name": "Jane"
+    },
+    {
+      "id": "3",
+      "name": "Charly"
+    },
+    {
+      "id": "4",
+      "name": "Jason"
+    },
+    {
+      "id": "c844",
+      "name": "Jhon"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "banan",
+      "price": 1.99
+    },
+    {
+      "id": "2",
+      "name": "apple",
+      "price": 0.89
+    },
+    {
+      "id": "3",
+      "name": "tomato",
+      "price": 1.2
+    },
+    {
+      "id": "4",
+      "name": "potato",
+      "price": 2
+    },
+    {
+      "id": "5",
+      "name": "carrot",
+      "price": 0.99
+    }
+  ]
+}
