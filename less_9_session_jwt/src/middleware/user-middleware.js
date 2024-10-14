@@ -1,6 +1,7 @@
 import bcrypt, { hash } from "bcrypt";
 import { users } from "../data/users.js";
 import path from "node:path";
+import nodemailer from "nodemailer";
 
 export const checkUser = (req, res, next) => {
     if(req.session.user && req.session) {
@@ -105,3 +106,42 @@ export const loginUser = (req, res) => {
 
     return res.redirect("/");
 }
+
+export const feedbackUser = () => {
+    if(req.body && req.body.email && req.body.message && req.body.subject) {
+        const { email, message, subject } = req.body;
+        const mailOpt = {
+            from: "Daniil Kostanda <danya19981017@gmail.com>",
+            to: email,
+            subject: subject,
+            text: message,
+        };
+
+        const trans = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            auth: {
+              user: "email",
+              pass: PASS,
+            },
+            tls: {
+              rejectUnauthorized: true,
+              minVersion: "TLSv1.2",
+            },
+        });
+
+        trans.sendMail(mailOpt, (err, info) => {
+            console.log(err, info);
+            if (err) {
+                console.log(err);
+                res.status(400).redirect("/");
+            } 
+            else {
+                console.log(info);
+                res.status(201).redirect("/");
+            }
+            
+        });
+    }
+    next();
+};

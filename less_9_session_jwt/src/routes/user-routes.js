@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { users } from "../data/users.js";
-import { loginUser } from "../middleware/user-middleware.js";
-import { createUser } from "../middleware/user-middleware.js";
+import { loginUser, createUser, feedbackUser } from "../middleware/user-middleware.js";
 import path from "node:path";
 import multer from "multer";
 
@@ -31,5 +30,11 @@ userRoutes.route("/signup")
 userRoutes.route("/signin")
     .get((req, res) => res.render("form_auth"))
     .post(loginUser);
+
+userRoutes.route("/feedback")
+    .get((req, res) => {
+        res.render("form_feedback");
+    })
+    .post(feedbackUser, (req, res) => {});
 
 export default userRoutes;

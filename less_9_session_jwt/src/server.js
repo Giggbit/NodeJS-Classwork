@@ -9,6 +9,36 @@ import siteRoutes from "./routes/site-routes.js";
 import logoutRoutes from "./routes/logout-routes.js";
 import { checkUser } from "./middleware/user-middleware.js";
 import session from "express-session";
+import { createClient } from "redis";
+import RedisStore from "connect-redis";
+
+const client = createClient({
+    url: "redis://5.tcp.eu.ngrok.io:19845"
+});
+
+async function run(client) {
+    await client.connect();
+}
+
+client.on("ready", () => {
+    console.log("connected...");
+    const redisStore = new RedisStore({
+        client: client,
+        ttl: 86400,
+    });
+    const app = express();  
+    app.use(express.static("photos"));
+    app.use(cookieParser());
+    app.use(
+        session({
+            store: redisStore,
+            secret: process.env.SESSION_KEY,
+            resave: false,
+            saveUninitialized: false,
+            cookie: {maxAge: 1000 * 60 * 60},
+        })
+    );
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -16,17 +46,6 @@ const hbs = exphbs.create({
     defaultLayout: "main",
     extname: "hbs",
 });
-
-const app = express();  
-app.use(express.static("photos"));
-app.use(cookieParser());
-app.use(
-    session({
-        secret: process.env.SESSION_KEY,
-        resave: false,
-        saveUninitialized: false,
-    })
-);
 
 app.use(checkUser);
 app.use(express.urlencoded({extended: true}));
