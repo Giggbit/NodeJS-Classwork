@@ -28,10 +28,14 @@
         <li class="nav-item">
           <a class="nav-link" href="/user/signin">Authorization</a>
         </li>
+        {{/if}}
         <li class="nav-item">
           <a class="nav-link" href="/user/feedback">Feedback</a>
         </li>
-        {{/if}}
+        <li class="nav-item">
+          <a class="nav-link" href="/user/mailinglist">Mailing List</a>
+        </li>
+        
       
     </div>
     {{#if user}}<div>Hello {{user}}! <img class="rounded-circle" style="height: 3vw; width: 3vw; object-fit: cover;" src={{image}} alt=""> <a href="/user/logout">Logout</a></div>{{/if}}

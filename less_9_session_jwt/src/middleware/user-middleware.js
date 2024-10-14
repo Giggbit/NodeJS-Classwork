@@ -1,5 +1,6 @@
 import bcrypt, { hash } from "bcrypt";
 import { users } from "../data/users.js";
+import { newsList } from "../data/newsList.js";
 import path from "node:path";
 import nodemailer from "nodemailer";
 
@@ -39,49 +40,6 @@ export const createUser = (req, res, next) => {
             res.status(400).redirect("/")
         }
     }
-
-    // if(
-    //     req.body &&
-    //     req.body.login &&
-    //     req.body.email &&
-    //     req.body.password &&
-    //     req.body.confirm_password &&
-    //     req.body.password === req.body.confirm_password
-    // ) {
-    //     const {login, email, password, confirm_password} = req.body;
-
-    //     if (!users || !email || !password || !confirm_password) {
-    //         return res.status(400).send("Все поля обязательны для заполнения");
-    //     }
-    //     if (!validator.isEmail(email)) {
-    //         return res.status(400).send("Некорректный формат email");
-    //     }
-    //     if (password !== confirm_password) {
-    //         return res.status(400).send("Пароли не совпадают");
-    //     }
-    //     if (!validator.isStrongPassword(password, { minLength: 8 })) {
-    //         return res.status(400).send("Пароль должен содержать минимум 8 символов, включая цифры и спецсимволы");
-    //     }
-
-    //     const existUser = users.find(users => users.email === email || users.login === login);
-    //     if(existUser) {
-    //         return res.status(400).send("Пользователь с таким логином или email уже существует");
-    //     }
-    //     const hash = bcrypt.hash(password, 10);
-
-    //     users.push({
-    //         id: users.length + 1,
-    //         login: login,
-    //         email: email,
-    //         password: hash,
-    //     });
-
-    //     req.session.user = {
-    //         login: req.body.login,
-    //         email: req.body.email,
-    //     };
-    //     res.redirect("/");
-    // }
 };
 
 export const loginUser = (req, res) => {
@@ -107,7 +65,7 @@ export const loginUser = (req, res) => {
     return res.redirect("/");
 }
 
-export const feedbackUser = () => {
+export const feedbackUser = (req, res, next) => {
     if(req.body && req.body.email && req.body.message && req.body.subject) {
         const { email, message, subject } = req.body;
         const mailOpt = {
@@ -121,8 +79,8 @@ export const feedbackUser = () => {
             host: "smtp.gmail.com",
             port: 587,
             auth: {
-              user: "email",
-              pass: PASS,
+              user: "danya19981017@gmail.com",
+              pass: "egls filg kmpc wwju",
             },
             tls: {
               rejectUnauthorized: true,
@@ -140,8 +98,53 @@ export const feedbackUser = () => {
                 console.log(info);
                 res.status(201).redirect("/");
             }
-            
         });
     }
+    next();
+};
+
+export const mailingListToUsers = (req, res, next) => {
+    const {emails, news} = req.body;
+    const emailArray = emails.split(",").map(email => email.trim()).filter(email => email);
+    const selectedNews = newsList.find(item => item.id === news);
+
+    if (!selectedNews) {
+        return res.status(400).send("Invalid news selection");
+    }
+    if (emailArray.length === 0) {
+        return res.status(400).send("No valid email addresses provided");
+    }
+
+    const mailOptions = {
+        from: "Daniil Kostanda <danya19981017@gmail.com>",
+        to: emailArray,
+        subject: selectedNews.title,
+        text: selectedNews.content,
+    };
+    const trans = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        auth: {
+            user: "danya19981017@gmail.com",
+            pass: "egls filg kmpc wwju",
+        },
+        tls: {
+            rejectUnauthorized: true,
+            minVersion: "TLSv1.2",
+        },
+    });
+    
+    emailArray.forEach((email) => {
+        trans.sendMail({ ...mailOptions, to: email }, (err, info) => {
+            if (err) {
+                console.error(`Error sending to ${email}:`, err);
+                res.status(400).redirect("/");
+            } 
+            else {
+                console.log(`Email sent to ${email}:`);
+                res.status(201).redirect("/");
+            }
+        });
+    });
     next();
 };

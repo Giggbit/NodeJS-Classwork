@@ -6,14 +6,19 @@ import "dotenv/config";
 import path from "node:path";
 import userRoutes from "./routes/user-routes.js";
 import siteRoutes from "./routes/site-routes.js";
-import logoutRoutes from "./routes/logout-routes.js";
 import { checkUser } from "./middleware/user-middleware.js";
 import session from "express-session";
+const PORT = process.env.PORT || 3000;
 import { createClient } from "redis";
 import RedisStore from "connect-redis";
 
+const hbs = exphbs.create({
+    defaultLayout: "main",
+    extname: "hbs",
+});
+
 const client = createClient({
-    url: "redis://5.tcp.eu.ngrok.io:19845"
+    url: "redis://127.0.0.1:6379",
 });
 
 async function run(client) {
@@ -21,7 +26,7 @@ async function run(client) {
 }
 
 client.on("ready", () => {
-    console.log("connected...");
+    console.log("Redis server connected...");
     const redisStore = new RedisStore({
         client: client,
         ttl: 86400,
@@ -38,28 +43,25 @@ client.on("ready", () => {
             cookie: {maxAge: 1000 * 60 * 60},
         })
     );
+    app.use(checkUser);
+
+    app.use(express.urlencoded({extended: true}));
+    app.use(express.static("public"));
+    app.engine("hbs", hbs.engine);
+    app.set("view engine", "hbs");
+    app.set("views", path.join("src", "views"));
+
+    app.use(siteRoutes);
+    app.use("/user", userRoutes);
+
+    app.get("/", (req, res) => res.render("home"));
+
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
 });
 
-const PORT = process.env.PORT || 3000;
+run(client);
 
-const hbs = exphbs.create({
-    defaultLayout: "main",
-    extname: "hbs",
-});
 
-app.use(checkUser);
-app.use(express.urlencoded({extended: true}));
-app.use(express.static("public"));
-app.engine("hbs", hbs.engine);
-app.set("view engine", "hbs");
-app.set("views", path.join("src", "views"));
 
-app.use(siteRoutes);
-app.use("/user", userRoutes);
-app.use("/user", logoutRoutes);
-
-app.get("/", (req, res) => res.render("home"));
-
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});

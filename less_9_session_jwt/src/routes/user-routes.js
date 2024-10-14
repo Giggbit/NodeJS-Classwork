@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { users } from "../data/users.js";
-import { loginUser, createUser, feedbackUser } from "../middleware/user-middleware.js";
+import { newsList } from "../data/newsList.js";
+import { loginUser, createUser, feedbackUser, mailingListToUsers } from "../middleware/user-middleware.js";
 import path from "node:path";
 import multer from "multer";
 
@@ -31,10 +32,26 @@ userRoutes.route("/signin")
     .get((req, res) => res.render("form_auth"))
     .post(loginUser);
 
+userRoutes.get("/logout", (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).send("Ошибка при выходе из системы.");
+        }
+        res.clearCookie('connect.sid');
+        res.redirect("/");
+    });
+});
+
 userRoutes.route("/feedback")
     .get((req, res) => {
         res.render("form_feedback");
     })
     .post(feedbackUser, (req, res) => {});
+
+userRoutes.route("/mailinglist")
+    .get((req, res) => {
+        res.render("form_mailinglist", {newsList});
+    })
+    .post(mailingListToUsers, (req, res) => {});
 
 export default userRoutes;

@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "connect-redis": "^7.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
@@ -19,6 +20,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
     "nodemon": "^3.1.7",
+    "redis": "^4.7.0",
     "validator": "^13.12.0"
   }
 }

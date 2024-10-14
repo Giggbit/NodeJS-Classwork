@@ -1,7 +1,7 @@
 import {createClient} from "redis";
 
 const client = createClient({
-    url: "redis://5.tcp.eu.ngrok.io:19845"
+    url: "redis://127.0.0.1:6379"
 });
 
 client.on("error", (err) => {
