@@ -1,9 +1,8 @@
 import { Router } from "express";
-import { users } from "../data/users.js";
-import { newsList } from "../data/newsList.js";
 import { loginUser, createUser, feedbackUser, mailingListToUsers } from "../middleware/user-middleware.js";
 import path from "node:path";
 import multer from "multer";
+import { dbConnection } from "../data/db.js";
 
 const storage = multer.diskStorage({
     destination: 'photos/',
@@ -16,7 +15,10 @@ const configMulter = multer({ storage: storage });
 const userRoutes = Router();
 
 userRoutes.route("/")
-    .get((req, res) => res.json(users));
+    .get((req, res) => {
+        const [users] = dbConnection.execute("SELECT * FROM users");
+        res.json(users);
+    });
 
 userRoutes.route("/signup")
     .get((req, res) => res.render("form_register"))
@@ -50,6 +52,7 @@ userRoutes.route("/feedback")
 
 userRoutes.route("/mailinglist")
     .get((req, res) => {
+        const [newsList] = dbConnection.execute("SELECT * FROM news");
         res.render("form_mailinglist", {newsList});
     })
     .post(mailingListToUsers, (req, res) => {});
